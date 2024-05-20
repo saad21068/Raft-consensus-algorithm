@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+service RaftClient {
+  rpc RequestVote(VoteRequest) returns (VoteRequestResponse);
+  rpc ServeClient (ServeClientArgs) returns (ServeClientReply) {}
+  rpc GetStatus(EmptyMessage) returns (EmptyMessage);
+  rpc GetLeader(EmptyMessage) returns (LeaderMessage);
+  rpc GetVal(Get_Key) returns (ServeClientReply);
+  rpc SetVal(Set_Key_Val) returns (Success);
+  rpc AppendEntries(AppendEntriesMessage) returns (AppendEntryReply);
+}
+message ServeClientArgs {
+  string input = 1;
+}
+
+message ServeClientReply {
+  string data = 1;
+  int32 leader_id = 2;
+  bool success = 3;
+  string message=4;
+}
+
+
+message EmptyMessage {}
+
+message LeaderMessage {
+  int32 leader = 1;
+  string address = 2;
+}
+message GetValResponse {
+  bool success = 1;
+  string value = 2;
+  int32 leader_id=3;
+  string message=4;
+}
+message Get_Key {
+  string key = 1;
+  int32 leader_id_start=2;
+}
+message Set_Key_Val {
+  string key = 1;
+  string value = 2;
+}
+message Success{
+  bool success = 1;
+}
+
+message VoteRequest {
+  int32 term = 1;
+  int32 id = 2;
+  int32 last_log_index = 3;
+  int32 last_log_term = 4;
+  float old_lease_time=5;
+}
+
+message VoteRequestResponse {
+  int32 term = 1;
+  bool result = 2;
+  float old_lease_time = 3;
+  float max_old_lease=4;
+}
+
+
+message AppendEntriesMessage {
+  int32 term = 1;
+  int32 id = 2;
+  int32 prev_log_index = 3;
+  int32 prev_log_term = 4;
+  repeated Entry entries = 5;
+  int32 leader_commit = 6;
+  float lease_interval=7;
+  int64 heartbeat_count=8;
+}
+message Entry {
+  int32 term = 1;
+  Update update = 2;
+}
+
+message Update {
+  string command = 1;
+  string key = 2;
+  string value = 3;
+}
+message AppendEntryReply {
+  int32 term = 1;
+  bool result = 2;
+  float storing_leasder_lease_time=3;
+  int64 heartbeat_count=4;
+
+}
